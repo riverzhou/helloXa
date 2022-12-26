@@ -28,7 +28,7 @@ namespace helloXa
 
         public async Task StartAsync()
         {
-            Print("开始扫描  ......");
+            Print("开始扫描 ......");
 
             adapter.DeviceDiscovered += (s, a) =>
             {
