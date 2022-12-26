@@ -5,14 +5,19 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using Google.Android.Material.BottomNavigation;
+using System;
+using System.Collections.Generic;
 
 namespace helloXa
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : AppCompatActivity, BottomNavigationView.IOnItemSelectedListener
     {
-        TextView textMessage;
+        private TextView textMessage;
+        private readonly List<String> showInfo = new List<String>();
+        private readonly int showCount = 28;
 
+        BleScaner scanner = null;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -21,7 +26,7 @@ namespace helloXa
 
             textMessage = FindViewById<TextView>(Resource.Id.message);
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
-            navigation.SetOnNavigationItemSelectedListener(this);
+            navigation.SetOnItemSelectedListener(this);
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -34,7 +39,12 @@ namespace helloXa
             switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:
-                    textMessage.SetText(Resource.String.title_home);
+                    if (scanner == null)
+                    {
+                        scanner = new BleScaner(this);
+                    }
+                    scanner?.StartAsync();
+                    //textMessage.SetText(Resource.String.title_home);
                     return true;
                 case Resource.Id.navigation_dashboard:
                     textMessage.SetText(Resource.String.title_dashboard);
@@ -47,6 +57,24 @@ namespace helloXa
                     return true;
             }
             return false;
+        }
+
+        public void Print(String info)
+        {
+            showInfo.Add(info);
+            if (showInfo.Count > showCount)
+            {
+                showInfo.RemoveAt(0);
+            }
+
+            String output = "";
+            foreach (String s in showInfo)
+            {
+                output += s + "\n";
+            }
+
+            textMessage.SetText(output, TextView.BufferType.Normal);
+
         }
     }
 }
