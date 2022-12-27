@@ -16,6 +16,8 @@ namespace helloXa
         private TextView textMessage;
         private readonly List<String> showInfo = new List<String>();
         private readonly int showCount = 28;
+        //private readonly Queue<string> printQueue = new Queue<string>();
+        //private readonly AutoResetEvent printEvent = new AutoResetEvent(false);
 
         BleScaner scanner = null;
         protected override void OnCreate(Bundle savedInstanceState)
@@ -25,6 +27,7 @@ namespace helloXa
             SetContentView(Resource.Layout.activity_main);
 
             textMessage = FindViewById<TextView>(Resource.Id.message);
+
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnItemSelectedListener(this);
         }
@@ -61,20 +64,20 @@ namespace helloXa
 
         public void Print(String info)
         {
-            showInfo.Add(info);
-            if (showInfo.Count > showCount)
+            lock (textMessage)
             {
-                showInfo.RemoveAt(0);
+                showInfo.Add(info);
+                if (showInfo.Count > showCount)
+                {
+                    showInfo.RemoveAt(0);
+                }
+                String output = "";
+                foreach (String s in showInfo)
+                {
+                    output += s + "\n";
+                }
+                textMessage.SetText(output, TextView.BufferType.Normal);
             }
-
-            String output = "";
-            foreach (String s in showInfo)
-            {
-                output += s + "\n";
-            }
-
-            textMessage.SetText(output, TextView.BufferType.Normal);
-
         }
     }
 }
